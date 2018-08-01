@@ -335,7 +335,7 @@ const main = async (type) => {
   program
     .version('0.0.1')
     .option('-w, --water [type]', '浇水功能，默认开启', true)
-    .option('-a, --all', '浇水功能中，是否所有账号开启登录，默认只登自己账号')
+    .option('-a, --all', '浇水功能中，是否所有账号开启登录，默认只登主账号')
     .option('-s, --sign', '签到功能')
     .option('-p, --publish', '发表牛牛圈功能')
     .option('-m, --message [type]', '发表牛牛圈时，发表内容', '坚持打卡')
