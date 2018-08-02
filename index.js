@@ -2,23 +2,13 @@ const puppeteer = require('puppeteer');
 const program = require('commander');
 const { user, xiaomi, Q, fb, tw, wb } = require('./creds');
 
-// #region 签到 发表
+// #region 签到
 // 登录页
 const LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fwww.futunn.com%2F';
 // 个人中心页
 const PERSONAL_SELECTOR = '#accountHeader > div:nth-child(1) > div.imgBox > a';
 // 签到按钮
 const SIGNIN_SELECTOR = '#signIn';
-// 发表牛牛圈页面
-const PUBLISH_CIRCLE_URL = 'https://www.futunn.com/nnq';
-// 聚焦的 输入框
-const FOCUS_INPUT_SELECTOR = '#placeholder';
-// 输入文字的 iframe
-const CIRCLE_FRAME_SELECTOR = '#ueditor_0';
-// 输入文字的 输入框
-const INPUT_SELECTOR = 'body';
-// 发表按钮
-const PUBLISH_BTN_SELECTOR = '#dynamicBar > div > a';
 // #endregion
 
 // #region login
@@ -222,22 +212,6 @@ const sign = async (page) => {
   console.log(`------签到结束------`);
 };
 
-// 发表牛牛圈功能
-const publish = async (page) => {
-  console.log(`------开始发表牛牛圈------`);
-  await page.goto(PUBLISH_CIRCLE_URL);
-  await page.waitForSelector(FOCUS_INPUT_SELECTOR, {visible: true});
-  await page.click(FOCUS_INPUT_SELECTOR);
-  await page.waitForSelector(CIRCLE_FRAME_SELECTOR, {visible: true});
-  const circleFrame = page.mainFrame().childFrames()[0];
-  console.log(`开始输入发表内容`);
-  await circleFrame.focus(INPUT_SELECTOR);
-  await page.keyboard.type(program.message);
-  await page.keyboard.down('Enter');
-  await page.click(PUBLISH_BTN_SELECTOR);
-  console.log(`------结束发表牛牛圈------`);
-};
-
 // 浇水
 const water = async (browser, page, type) => {
   // 浇水人数
@@ -302,7 +276,7 @@ const main = async (type) => {
   // 去除 页面内部自定义宽高 导致 滚动条出现
   await page._client.send('Emulation.clearDeviceMetricsOverride');
   // 判断是否开启 签到功能
-  if (program.sign || program.publish) {
+  if (program.sign) {
     await page.goto(LOGIN_URL, {waitUntil: 'load'});
   } else {
     await page.goto(SEED_LOGIN_URL, {waitUntil: 'load'});
@@ -314,17 +288,13 @@ const main = async (type) => {
   if (program.sign) {
     await sign(page);
   }
-  // 是否发布牛牛圈
-  if (program.publish) {
-    await publish(page);
-  }
   // 是否开启浇水功能
   if (!program.water) {
     await browser.close();
     return false;
   }
   // 是否签到 或 是否发布圈子
-  if (program.sign || program.publish) {
+  if (program.sign) {
     await page.goto(SEED_URL, {waitUntil: 'load'});
   }
   // 开始浇水
@@ -337,8 +307,6 @@ const main = async (type) => {
     .option('-w, --water [type]', '浇水功能，默认开启', true)
     .option('-a, --all', '浇水功能中，是否所有账号开启登录，默认只登主账号')
     .option('-s, --sign', '签到功能')
-    .option('-p, --publish', '发表牛牛圈功能')
-    .option('-m, --message [type]', '发表牛牛圈时，发表内容', '坚持打卡')
     .parse(process.argv);
 
   if (program.all) {
