@@ -268,6 +268,7 @@ const main = async (type) => {
   const height = 950;
   let args = [];
   args.push(`--window-size=${width},${height}`);
+  args.push(`--no-sandbox`);
   // 若要显示无头浏览器 打开下行注释即可
   // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
   // 上行注释打开 下行注释需要关闭
