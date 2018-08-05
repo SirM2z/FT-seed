@@ -2,6 +2,7 @@ const os = require('os')
 const puppeteer = require('puppeteer');
 const program = require('commander');
 const { user, xiaomi, Q, fb, tw, wb } = require('./creds');
+const platform = os.platform();
 
 // #region 签到
 // 登录页
@@ -241,8 +242,12 @@ const water = async (browser, page, type) => {
   for (let i = 0; ; i++) {
     console.log(`------判断是否有人待浇水------`);
     let judgeIsEnd = 1;
+    let friendlistTimeout = 1000;
+    if (platform === 'linux') {
+      friendlistTimeout = 10000;
+    }
     try {
-      await page.waitForSelector(FIRSTFRIENDS_SELECTOR, {visible: true, timeout: 1000});
+      await page.waitForSelector(FIRSTFRIENDS_SELECTOR, {visible: true, timeout: friendlistTimeout});
     } catch (error) {
       judgeIsEnd = 2;
     }
@@ -265,7 +270,6 @@ const water = async (browser, page, type) => {
 }
 
 const main = async (type) => {
-  const platform = os.platform();
   const width = 750;
   const height = 950;
   let args = [];
