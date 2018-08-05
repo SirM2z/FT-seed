@@ -1,3 +1,4 @@
+const os = require('os')
 const puppeteer = require('puppeteer');
 const program = require('commander');
 const { user, xiaomi, Q, fb, tw, wb } = require('./creds');
@@ -264,11 +265,14 @@ const water = async (browser, page, type) => {
 }
 
 const main = async (type) => {
+  const platform = os.platform();
   const width = 750;
   const height = 950;
   let args = [];
   args.push(`--window-size=${width},${height}`);
-  args.push(`--no-sandbox`);
+  if (platform === 'linux') {
+    args.push(`--no-sandbox`);
+  }
   // 若要显示无头浏览器 打开下行注释即可
   // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
   // 上行注释打开 下行注释需要关闭
