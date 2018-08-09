@@ -201,7 +201,7 @@ const sign = async (page) => {
   await page.click(PERSONAL_SELECTOR);
   let judgeIsSign = 1;
   try {
-    await page.waitForSelector(SIGNIN_SELECTOR, {visible: true, timeout: 3000});
+    await page.waitForSelector(SIGNIN_SELECTOR, {visible: true, timeout: 10000});
   } catch (error) {
     judgeIsSign = 2;
   }
