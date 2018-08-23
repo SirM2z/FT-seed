@@ -123,6 +123,13 @@ const getHtml = async (page, selector) => {
   }
 };
 
+// 延迟
+const delay = (t) => {
+  return Promise((resolve) => {
+    setTimeout(resolve, t)
+  })
+};
+
 // 登录功能
 const login = async (page, type) => {
   console.log(`------开始登录当前角色-${type}------`);
@@ -245,6 +252,7 @@ const water = async (browser, page, type) => {
     let friendlistTimeout = 1000;
     if (platform === 'linux') {
       friendlistTimeout = 10000;
+      await delay(1000);
     }
     try {
       await page.waitForSelector(FIRSTFRIENDS_SELECTOR, {visible: true, timeout: friendlistTimeout});
