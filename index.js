@@ -125,7 +125,7 @@ const getHtml = async (page, selector) => {
 
 // 延迟
 const delay = (t) => {
-  return Promise((resolve) => {
+  return new Promise((resolve) => {
     setTimeout(resolve, t)
   })
 };
