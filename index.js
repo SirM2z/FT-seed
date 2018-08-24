@@ -10,7 +10,7 @@ const LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fwww.futunn.c
 // 个人中心页
 const PERSONAL_SELECTOR = '#accountHeader > div:nth-child(1) > div.imgBox > a';
 // 签到按钮
-const SIGNIN_SELECTOR = '#signIn';
+const SIGNIN_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > span';
 // #endregion
 
 // #region login
@@ -205,7 +205,6 @@ const login = async (page, type) => {
 // 签到功能
 const sign = async (page) => {
   console.log(`------开始签到------`);
-  await page.click(PERSONAL_SELECTOR);
   let judgeIsSign = 1;
   try {
     await page.waitForSelector(SIGNIN_SELECTOR, {visible: true, timeout: 10000});
