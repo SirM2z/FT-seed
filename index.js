@@ -339,9 +339,9 @@ const main = async (type, userindex) => {
     args.push(`--no-sandbox`);
   }
   // 若要显示无头浏览器 打开下行注释即可
-  const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
+  // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
   // 上行注释打开 下行注释需要关闭
-  // const browser = await puppeteer.launch({slowMo: 100});
+  const browser = await puppeteer.launch({slowMo: 100});
   const pages = await browser.pages();
   const page = pages[0];
   // 去除 页面内部自定义宽高 导致 滚动条出现
