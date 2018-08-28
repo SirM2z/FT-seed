@@ -378,7 +378,7 @@ const main = async (type, userindex) => {
   if (program.all) {
     // 副号 走一波
     if (user.length > 1) {
-      for (let i = 1; i < xiaomi.length; i++) {
+      for (let i = 1; i < user.length; i++) {
         await main('self', i);
       }
     }
