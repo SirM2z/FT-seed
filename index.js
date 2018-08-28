@@ -368,6 +368,26 @@ const main = async (type, userindex) => {
   const page = pages[0];
   // 去除 页面内部自定义宽高 导致 滚动条出现
   await page._client.send('Emulation.clearDeviceMetricsOverride');
+  let main_finished = false; // 应用是否执行完毕
+  let requestfinished_event = false; // 响应事件触发完毕
+  // 监听页面 请求完成事件
+  page.on('requestfinished', async interceptedRequest => {
+    if (interceptedRequest.url().includes('https://seed.futunn.com/main/culture-room')) {
+      let response = interceptedRequest.response();
+      let bodydata = await response.json();
+      let id = bodydata.data.seed.seed_id;
+      let key = bodydata.data.seed_package.key;
+      let url = `https://seed.futunn.com/package?key=${key}`;
+      let content = SEED_PACKAGE_CONTENT.replace('date', new Date().toLocaleString()).replace('package_src', url);
+      if (key) {
+        await wt(content);
+      }
+      requestfinished_event = true
+      if (main_finished) {
+        await browser.close();
+      }
+    }
+  });
   // 判断是否开启 签到功能
   if (program.sign) {
     await page.goto(LOGIN_URL, {waitUntil: 'load'});
@@ -381,28 +401,12 @@ const main = async (type, userindex) => {
   if (program.sign) {
     await sign(browser, page);
   }
-  let main_finished = false; // 应用是否执行完毕
-  let requestfinished_event = false; // 响应事件触发完毕
+  // 是否签到 且 是否开启浇水
+  if (program.sign && program.water) {
+    await page.goto(SEED_URL, {waitUntil: 'load'});
+  }
   // 是否开启浇水功能
   if (program.water) {
-    await page.goto(SEED_URL, {waitUntil: 'load'});
-    page.on('requestfinished', async interceptedRequest => {
-      if (interceptedRequest.url().includes('https://seed.futunn.com/main/culture-room')) {
-        let response = interceptedRequest.response();
-        let bodydata = await response.json();
-        let id = bodydata.data.seed.seed_id;
-        let key = bodydata.data.seed_package.key;
-        let url = `https://seed.futunn.com/package?key=${key}`;
-        let content = SEED_PACKAGE_CONTENT.replace('date', new Date().toLocaleString()).replace('package_src', url);
-        if (key) {
-          await wt(content);
-        }
-        requestfinished_event = true
-        if (main_finished) {
-          await browser.close();
-        }
-      }
-    });
     await water(page, type, userindex);
   }
   main_finished = true;
