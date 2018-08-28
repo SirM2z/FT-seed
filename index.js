@@ -1,4 +1,5 @@
 const os = require('os')
+const fs = require('fs')
 const puppeteer = require('puppeteer');
 const program = require('commander');
 const { user, xiaomi, Q, fb, tw, wb } = require('./creds');
@@ -120,6 +121,13 @@ const RECENT_SELECTOR = 'body > div.seedWrap01 > div > div.friends > div.friends
 const FOLLOWED_SELECTOR = 'body > div.seedWrap01 > div > div.friends > div.friends-timeline-container > ul > li:nth-child(1) > div.follow.followed';
 // 第一个未关注按钮
 const FOLLOW_SELECTOR = 'body > div.seedWrap01 > div > div.friends > div.friends-timeline-container > ul > li:nth-child(1) > div.follow';
+// #endregion
+
+// #region 种子包相关
+const SEED_PACKAGE_CONTENT = `
+时间： date
+分享包路径： package_src
+`
 // #endregion
 
 const getHtml = async (page, selector) => {
@@ -330,6 +338,20 @@ const water = async (page, type, userindex) => {
   }
 }
 
+// 写入种子包
+const wt = (content) => {
+  return new Promise((resolve, rehect) => {
+    fs.open('seedpackage.txt', 'a', (e, fd) => {
+      if (e) {rehect(); throw e;}
+      fs.write(fd, content, 'utf8', (e) => {
+        if (e) {rehect(); throw e;}
+        fs.closeSync(fd)
+        resolve()
+      })
+    })
+  })
+};
+
 const main = async (type, userindex) => {
   const width = 1200;
   const height = 950;
@@ -359,12 +381,34 @@ const main = async (type, userindex) => {
   if (program.sign) {
     await sign(browser, page);
   }
+  let main_finished = false; // 应用是否执行完毕
+  let requestfinished_event = false; // 响应事件触发完毕
   // 是否开启浇水功能
   if (program.water) {
     await page.goto(SEED_URL, {waitUntil: 'load'});
-    await water(page, type, userindex);
+    page.on('requestfinished', async interceptedRequest => {
+      if (interceptedRequest.url().includes('https://seed.futunn.com/main/culture-room')) {
+        let response = interceptedRequest.response();
+        let bodydata = await response.json();
+        let id = bodydata.data.seed.seed_id;
+        let key = bodydata.data.seed_package.key;
+        let url = `https://seed.futunn.com/package?key=${key}`;
+        let content = SEED_PACKAGE_CONTENT.replace('date', new Date().toLocaleString()).replace('package_src', url);
+        if (key) {
+          await wt(content);
+        }
+        requestfinished_event = true
+        if (main_finished) {
+          await browser.close();
+        }
+      }
+    });
+    // await water(page, type, userindex);
   }
-  await browser.close();
+  main_finished = true;
+  if (requestfinished_event) {
+    await browser.close();
+  }
 }
 
 (async () => {
@@ -406,4 +450,4 @@ const main = async (type, userindex) => {
     // 主号 走一波
     await main('self', 0);
   }
-})()
+})();
