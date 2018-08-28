@@ -403,7 +403,7 @@ const main = async (type, userindex) => {
         }
       }
     });
-    // await water(page, type, userindex);
+    await water(page, type, userindex);
   }
   main_finished = true;
   if (requestfinished_event) {
