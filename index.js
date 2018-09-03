@@ -340,16 +340,16 @@ const water = async (page, type, userindex) => {
 
 // 写入种子包
 const wt = (content) => {
-  return new Promise((resolve, rehect) => {
+  return new Promise((resolve, reject) => {
     fs.open('seedpackage.txt', 'a', (e, fd) => {
-      if (e) {rehect(); throw e;}
-      fs.write(fd, content, 'utf8', (e) => {
-        if (e) {rehect(); throw e;}
+      if (e) {reject(); throw e;}
+      fs.appendFile(fd, content, 'utf8', (e) => {
+        if (e) {reject(); throw e;}
         fs.closeSync(fd)
         resolve()
       })
     })
-  })
+  }).catch(err => {console.log(err);});
 };
 
 const main = async (type, userindex) => {
