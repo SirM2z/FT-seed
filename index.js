@@ -235,6 +235,7 @@ const sign = async (browser, page) => {
     console.log(`    阅读新闻成功`);
     await page.click(NEWS_SELECTOR);
     const newPage = await newPagePromise;
+    await delay(2000);
     await newPage.close();
   } else {
     console.log(`     今天已签到`);
