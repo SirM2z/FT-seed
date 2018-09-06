@@ -442,6 +442,10 @@ const main = async (browser, page, type, userindex, user, nums) => {
       }
     }
   } else {
+    const pages = await browser.pages();
+    const page = pages[0];
+    // 去除 页面内部自定义宽高 导致 滚动条出现
+    await page._client.send('Emulation.clearDeviceMetricsOverride');
     // 主号 走一波
     await main(browser, page, 'self', 0, data[0].list[0]);
   }
