@@ -413,9 +413,9 @@ const main = async (browser, page, type, userindex, user, nums) => {
     args.push(`--no-sandbox`);
   }
   // 若要显示无头浏览器 打开下行注释即可
-  const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
+  // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
   // 上行注释打开 下行注释需要关闭
-  // const browser = await puppeteer.launch({slowMo: 100});
+  const browser = await puppeteer.launch({slowMo: 100});
   // 控制是否点击 可施肥 按钮
   let nums = 0;
   // 控制执行逻辑
