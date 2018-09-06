@@ -446,8 +446,12 @@ const main = async (browser, page, type, userindex, user, nums) => {
     const page = pages[0];
     // 去除 页面内部自定义宽高 导致 滚动条出现
     await page._client.send('Emulation.clearDeviceMetricsOverride');
-    // 主号 走一波
-    await main(browser, page, 'self', 0, data[0].list[0]);
+    try {
+      // 主号 走一波
+      await main(browser, page, 'self', 0, data[0].list[0]);
+    } catch (error) {
+      console.log(`主号--出错`);
+    }
   }
   await browser.close();
 })();
