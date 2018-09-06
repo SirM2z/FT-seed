@@ -43,64 +43,61 @@ node index.js -h
 格式如下
 ```js
 module.exports = {
-  // 富途账号登录 (第一个账号默认为主账号)
-  user: [
+  // list 为账号数组
+  data: [
     {
-      name: '',
-      pwd: '',
-    }, {
-      name: '',
-      pwd: '.',
-    }
-  ],
-  // 小米登录
-  xiaomi: [
+      type: 'user', // 富途账号登录 (第一个账号默认为主账号)
+      list: [
+        {
+          name: "name",
+          pwd: "pwd"
+        }
+      ]
+    },
     {
-      name: '',
-      pwd: '',
-    }, {
-      name: '',
-      pwd: '.',
-    }
-  ],
-  // qq登录
-  Q: [
+      type: 'xiaomi', // 小米登录
+      list: [
+        {
+          name: "name",
+          pwd: "pwd"
+        }
+      ]
+    },
     {
-      name: '',
-      pwd: '',
-    }, {
-      name: '',
-      pwd: '.',
-    }
-  ],
-  // facebook 登录
-  fb: [
+      type: 'Q', // qq登录
+      list: [
+        {
+          name: "name",
+          pwd: "pwd"
+        }
+      ],
+    },
     {
-      name: '',
-      pwd: '',
-    }, {
-      name: '',
-      pwd: '.',
-    }
-  ],
-  // twitter 登录
-  tw: [
+      type: 'fb', // facebook 登录
+      list: [
+        {
+          name: "name",
+          pwd: "pwd"
+        }
+      ]
+    },
     {
-      name: '',
-      pwd: '',
-    }, {
-      name: '',
-      pwd: '.',
-    }
-  ],
-  // 微博登录
-  wb: [
+      type: 'tw', // twitter 登录
+      list: [
+        {
+          name: "name",
+          pwd: "pwd"
+        }
+      ]
+    },
     {
-      name: '',
-      pwd: '',
-    }, {
-      name: '',
-      pwd: '.',
+      type: 'wb', // 微博登录
+      list: [
+        {
+          name: "name",
+          pwd: "pwd"
+        }
+      ]
     }
   ]
 };

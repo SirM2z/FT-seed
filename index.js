@@ -2,18 +2,24 @@ const os = require('os')
 const fs = require('fs')
 const puppeteer = require('puppeteer');
 const program = require('commander');
-const { user, xiaomi, Q, fb, tw, wb } = require('./creds');
+const { data } = require('./creds');
 const platform = os.platform();
 
 // #region 签到
 // 登录页
 const LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fwww.futunn.com%2F';
+// 签到页
+const SIGN_URL = 'https://www.futunn.com/';
 // 个人中心页
 const PERSONAL_SELECTOR = '#accountHeader > div:nth-child(1) > div.imgBox > a';
 // 签到按钮
 const SIGNIN_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > span';
+// 签过到按钮
+const SIGNED_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > a.sign-btn';
 // 今日要闻
 const NEWS_SELECTOR = 'body > div.wrap > div.homeHotBox > div.cBox01 > div > div.c01 > div > ul > li:nth-child(1) > a';
+// 退出页
+const LOGOUT = 'https://www.futunn.com/site/logout';
 // #endregion
 
 // #region login
@@ -150,14 +156,14 @@ const delay = (t) => {
 };
 
 // 登录功能
-const login = async (page, type, userindex) => {
+const login = async (page, type, userindex, user) => {
   console.log(`------开始登录当前角色-${type}-${userindex}-----`);
   if (type === 'self') {
     await page.evaluate((username, password, button, name, pwd) => {
       document.querySelector(username).value = name;
       document.querySelector(password).value = pwd;
       document.querySelector(button).click();
-    }, USERNAME_SELECTOR, PASSWORD_SELECTOR, BUTTON_SELECTOR, user[userindex].name, user[userindex].pwd);
+    }, USERNAME_SELECTOR, PASSWORD_SELECTOR, BUTTON_SELECTOR, user.name, user.pwd);
     await page.waitForNavigation();
   } else if (type === 'xiaomi') {
     await page.click(XIAOMI_SELECTOR);
@@ -166,19 +172,21 @@ const login = async (page, type, userindex) => {
       document.querySelector(username).value = name;
       document.querySelector(password).value = pwd;
       document.querySelector(button).click();
-    }, XIAOMI_USERNAME_SELECTOR, XIAOMI_PASSWORD_SELECTOR, XIAOMI_BUTTON_SELECTOR, xiaomi[userindex].name, xiaomi[userindex].pwd);
+    }, XIAOMI_USERNAME_SELECTOR, XIAOMI_PASSWORD_SELECTOR, XIAOMI_BUTTON_SELECTOR, user.name, user.pwd);
     await page.waitForNavigation();
   } else if (type === 'Q') {
     await page.click(Q_SELECTOR);
     await page.waitForSelector(Q_FRAME_SELECTOR, {visible: true});
     const loginFrame = page.mainFrame().childFrames()[0];
     await loginFrame.waitForSelector(Q_USERNAME_BTN_SELECTOR, {visible: true});
-    await loginFrame.evaluate((qqlogin, username, password, button, name, pwd) => {
-      document.querySelector(qqlogin).click();
-      document.querySelector(username).value = name;
-      document.querySelector(password).value = pwd;
-      document.querySelector(button).click();
-    },Q_USERNAME_BTN_SELECTOR, Q_USERNAME_SELECTOR, Q_PASSWORD_SELECTOR, Q_BUTTON_SELECTOR, Q[userindex].name, Q[userindex].pwd);
+    await loginFrame.click(Q_USERNAME_BTN_SELECTOR);
+    if (userindex !== 0) {
+      await loginFrame.evaluate((username) => {
+        document.querySelector(username).value = '';
+      }, Q_USERNAME_SELECTOR);
+    }
+    await loginFrame.type(Q_USERNAME_SELECTOR, user.name);
+    await loginFrame.type(Q_PASSWORD_SELECTOR, user.pwd);
     await loginFrame.click(Q_BUTTON_SELECTOR);
     await page.waitForNavigation();
   } else if (type === 'fb') {
@@ -188,7 +196,7 @@ const login = async (page, type, userindex) => {
       document.querySelector(username).value = name;
       document.querySelector(password).value = pwd;
       document.querySelector(button).click();
-    }, FB_USERNAME_SELECTOR, FB_PASSWORD_SELECTOR, FB_BUTTON_SELECTOR, fb[userindex].name, fb[userindex].pwd);
+    }, FB_USERNAME_SELECTOR, FB_PASSWORD_SELECTOR, FB_BUTTON_SELECTOR, user.name, user.pwd);
     await page.waitForNavigation();
   } else if (type === 'tw') {
     await page.click(TW_SELECTOR);
@@ -197,22 +205,13 @@ const login = async (page, type, userindex) => {
       document.querySelector(username).value = name;
       document.querySelector(password).value = pwd;
       document.querySelector(button).click();
-    }, TW_USERNAME_SELECTOR, TW_PASSWORD_SELECTOR, TW_BUTTON_SELECTOR, tw[userindex].name, tw[userindex].pwd);
+    }, TW_USERNAME_SELECTOR, TW_PASSWORD_SELECTOR, TW_BUTTON_SELECTOR, user.name, user.pwd);
     await page.waitForNavigation();
   } else if (type === 'wb') {
     await page.click(WB_SELECTOR);
     await page.waitForSelector(WB_USERNAME_SELECTOR, {visible: true});
-
-    // 微博 傻逼
-    // await page.evaluate((username, password, name, pwd) => {
-    //   document.querySelector(username).value = name;
-    //   document.querySelector(password).value = pwd;
-    // }, WB_USERNAME_SELECTOR, WB_PASSWORD_SELECTOR, wb.name, wb.pwd);
-
-    // await page.focus(WB_USERNAME_SELECTOR);
-    // await page.keyboard.press('Delete', {delay: 1000});
-    await page.type(WB_USERNAME_SELECTOR, wb[userindex].name);
-    await page.type(WB_PASSWORD_SELECTOR, wb[userindex].pwd);
+    await page.type(WB_USERNAME_SELECTOR, user.name);
+    await page.type(WB_PASSWORD_SELECTOR, user.pwd);
     await page.click(WB_BUTTON_SELECTOR);
     await page.waitForNavigation();
   }
@@ -221,30 +220,29 @@ const login = async (page, type, userindex) => {
 
 // 签到功能
 const sign = async (browser, page) => {
+  await page.goto(SIGN_URL, {waitUntil: 'load'});
   console.log(`------开始签到------`);
-  let judgeIsSign = 1;
-  try {
-    await page.waitForSelector(SIGNIN_SELECTOR, {visible: true, timeout: 10000});
-  } catch (error) {
-    judgeIsSign = 2;
-  }
+  let judgeIsSign = await Promise.race([
+    page.waitForSelector(SIGNIN_SELECTOR, {visible: true}).then(_ => 1),
+    page.waitForSelector(SIGNED_SELECTOR, {visible: true}).then(_ => 2)
+  ]);
   if (judgeIsSign === 1) {
     console.log(`      成功签到`);
     await page.click(SIGNIN_SELECTOR);
-    const newPagePromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
-    console.log(`    阅读新闻成功`);
-    await page.click(NEWS_SELECTOR);
-    const newPage = await newPagePromise;
-    await delay(2000);
-    await newPage.close();
   } else {
     console.log(`     今天已签到`);
   }
+  const newPagePromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
+  console.log(`    阅读新闻成功`);
+  await page.click(NEWS_SELECTOR);
+  const newPage = await newPagePromise;
+  await delay(2000);
+  await newPage.close();
   console.log(`------签到结束------`);
 };
 
 // 批量关注功能
-const floow = async (page, userindex) => {
+const floow = async (page) => {
   let index = 0
   await page.waitForSelector(FOOTER_SELECTOR, {visible: true})
   await page.click(HUDONG_SELECTOR);
@@ -256,7 +254,7 @@ const floow = async (page, userindex) => {
       console.log('request 请求拦截');
       console.log({'url': interceptedRequest.url()});
       console.log({'postData': interceptedRequest.postData()});
-      console.log(`${user[userindex]} 正在重定向关注 ${niuniu[index]}`);
+      console.log(`正在重定向关注 ${niuniu[index]}`);
       interceptedRequest.continue({
         postData: `follow_id=${niuniu[index]}&action=0`,
       });
@@ -286,9 +284,9 @@ const floow = async (page, userindex) => {
 };
 
 // 浇水功能
-const water = async (page, type, userindex) => {
+const water = async (page, type, userindex, nums) => {
   // 浇水人数
-  let nums = 0;
+  let water_nums = 0;
   await page.waitForSelector(FOOTER_SELECTOR, {visible: true})
   console.log(`------浇水开始！-${type}-${userindex}-----`);
   const judgeIsGet = await Promise.race([
@@ -307,9 +305,11 @@ const water = async (page, type, userindex) => {
   await page.click(SELF_SELECTOR);
   console.log(`点击互动页`);
   await page.click(HUDONG_SELECTOR);
-  console.log(`点击可浇水按钮`);
-  await page.waitForSelector(CANSHIFEI_SELECTOR, {visible: true});
-  await page.click(CANSHIFEI_SELECTOR);
+  if (nums === 0) {
+    console.log(`点击可浇水按钮`);
+    await page.waitForSelector(CANSHIFEI_SELECTOR, {visible: true});
+    await page.click(CANSHIFEI_SELECTOR);
+  }
   for (let i = 0; ; i++) {
     console.log(`------判断是否有人待浇水------`);
     let judgeIsEnd = 1;
@@ -325,15 +325,14 @@ const water = async (page, type, userindex) => {
     }
     if (judgeIsEnd === 2) {
       console.log(`------浇水结束！-${type}-${userindex}-----`);
-      console.log(' ');
       return;
     }
-    console.log(`         第${++nums}人---浇水`);
+    console.log(`         第${++water_nums}人---浇水`);
     await page.click(FIRSTFRIENDS_SELECTOR);
     console.log('          来到浇水页');
     await page.waitForSelector(TEST, {visible: true});
     await page.click(TEST);
-    console.log(`         第${nums}人---浇完`);
+    console.log(`         第${water_nums}人---浇完`);
     await page.waitForSelector(BACKFAMER_SELECTOR, {visible: true});
     await page.click(BACKFAMER_SELECTOR);
   }
@@ -353,22 +352,7 @@ const wt = (content) => {
   }).catch(err => {console.log(err);});
 };
 
-const main = async (type, userindex) => {
-  const width = 1200;
-  const height = 950;
-  let args = [];
-  args.push(`--window-size=${width},${height}`);
-  if (platform === 'linux') {
-    args.push(`--no-sandbox`);
-  }
-  // 若要显示无头浏览器 打开下行注释即可
-  // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
-  // 上行注释打开 下行注释需要关闭
-  const browser = await puppeteer.launch({slowMo: 100});
-  const pages = await browser.pages();
-  const page = pages[0];
-  // 去除 页面内部自定义宽高 导致 滚动条出现
-  await page._client.send('Emulation.clearDeviceMetricsOverride');
+const main = async (browser, page, type, userindex, user, nums) => {
   let main_finished = false; // 应用是否执行完毕
   let requestfinished_event = false; // 响应事件触发完毕
   // 监听页面 请求完成事件
@@ -383,36 +367,32 @@ const main = async (type, userindex) => {
       if (key) {
         await wt(content);
       }
-      requestfinished_event = true
+      requestfinished_event = true;
       if (main_finished) {
-        await browser.close();
+        await page.goto(LOGOUT);
+        return;
       }
     }
   });
-  // 判断是否开启 签到功能
-  if (program.sign) {
-    await page.goto(LOGIN_URL, {waitUntil: 'load'});
-  } else {
-    await page.goto(SEED_LOGIN_URL, {waitUntil: 'load'});
-  }
+  await page.goto(SEED_LOGIN_URL, {waitUntil: 'load'});
   await page.setDefaultNavigationTimeout(60 * 1000);
   // 登录
-  await login(page, type, userindex);
+  await login(page, type, userindex, user);
   // 是否签到
-  if (program.sign) {
+  if (program.sign === true) {
     await sign(browser, page);
   }
-  // 是否签到 且 是否开启浇水
-  if (program.sign && program.water) {
-    await page.goto(SEED_URL, {waitUntil: 'load'});
-  }
   // 是否开启浇水功能
-  if (program.water) {
-    await water(page, type, userindex);
+  if (program.water === true) {
+    await water(page, type, userindex, nums);
+  } else {
+    await page.goto(LOGOUT);
+    return;
   }
   main_finished = true;
   if (requestfinished_event) {
-    await browser.close();
+    await page.goto(LOGOUT);
+    return;
   }
 }
 
@@ -424,35 +404,46 @@ const main = async (type, userindex) => {
     .option('-s, --sign', '签到+阅读新闻功能')
     .parse(process.argv);
   
+  // 启动
+  const width = 1200;
+  const height = 950;
+  let args = [];
+  args.push(`--window-size=${width},${height}`);
+  if (platform === 'linux') {
+    args.push(`--no-sandbox`);
+  }
+  // 若要显示无头浏览器 打开下行注释即可
+  // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
+  // 上行注释打开 下行注释需要关闭
+  const browser = await puppeteer.launch({slowMo: 100});
+  // 控制是否点击 可施肥 按钮
+  let nums = 0;
+  // 控制执行逻辑
   if (program.all) {
     // 副号 走一波
-    if (user.length > 1) {
-      for (let i = 1; i < user.length; i++) {
-        await main('self', i);
+    for (let i = 0, ilen = data.length; i < ilen; i++) {
+      for (let j = 0, jlen = data[i].list.length; j < jlen; j++) {
+        if (data[i].type === 'user' && j === 0) continue;
+        const page = await browser.newPage();
+        // 去除 页面内部自定义宽高 导致 滚动条出现
+        await page._client.send('Emulation.clearDeviceMetricsOverride');
+        const pages = await browser.pages();
+        for (let x = 0; x < pages.length - 1; x++) {
+          await pages[x].close();
+        }
+        try {
+          console.log(' ');
+          await main(browser, page, data[i].type, j, data[i].list[j], nums);
+          nums++;
+        } catch (error) {
+          // console.log(error);
+          console.log(`${data[i].type}--${j}--出错`);
+        }
       }
-    }
-    // 小米 走一波
-    for (let i = 0; i < xiaomi.length; i++) {
-      await main('xiaomi', i);
-    }
-    // Q 走一波
-    for (let i = 0; i < Q.length; i++) {
-      await main('Q', i);
-    }
-    // 脸书 走一波
-    for (let i = 0; i < fb.length; i++) {
-      await main('fb', i);
-    }
-    // weibo 走一波
-    for (let i = 0; i < wb.length; i++) {
-      await main('wb', i);
-    }
-    // twitter 走一波
-    for (let i = 0; i < tw.length; i++) {
-      await main('tw', i);
     }
   } else {
     // 主号 走一波
-    await main('self', 0);
+    await main(browser, page, 'self', 0, data[0].list[0]);
   }
+  await browser.close();
 })();
