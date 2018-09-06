@@ -448,7 +448,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     await page._client.send('Emulation.clearDeviceMetricsOverride');
     try {
       // 主号 走一波
-      await main(browser, page, 'self', 0, data[0].list[0]);
+      await main(browser, page, 'self', 0, data[0].list[0], nums);
     } catch (error) {
       console.log(`主号--出错`);
     }
