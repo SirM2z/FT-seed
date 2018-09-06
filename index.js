@@ -413,9 +413,9 @@ const main = async (browser, page, type, userindex, user, nums) => {
     args.push(`--no-sandbox`);
   }
   // 若要显示无头浏览器 打开下行注释即可
-  // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
+  const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
   // 上行注释打开 下行注释需要关闭
-  const browser = await puppeteer.launch({slowMo: 100});
+  // const browser = await puppeteer.launch({slowMo: 100});
   // 控制是否点击 可施肥 按钮
   let nums = 0;
   // 控制执行逻辑
@@ -423,7 +423,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     // 副号 走一波
     for (let i = 0, ilen = data.length; i < ilen; i++) {
       for (let j = 0, jlen = data[i].list.length; j < jlen; j++) {
-        if (data[i].type === 'user' && j === 0) continue;
+        if (data[i].type === 'self' && j === 0) continue;
         const page = await browser.newPage();
         // 去除 页面内部自定义宽高 导致 滚动条出现
         await page._client.send('Emulation.clearDeviceMetricsOverride');

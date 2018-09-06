@@ -46,7 +46,7 @@ module.exports = {
   // list 为账号数组
   data: [
     {
-      type: 'user', // 富途账号登录 (第一个账号默认为主账号)
+      type: 'self', // 富途账号登录 (第一个账号默认为主账号)
       list: [
         {
           name: "name",
