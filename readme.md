@@ -20,12 +20,22 @@ git clone https://github.com/SirM2z/FT-seed.git
 
 ```shell
 npm i
+
+# or
+
+yarn
 ```
 
-or
+安装系统依赖
 
 ```shell
-yarn
+# centos
+#依赖库
+yum install pango.x86_64 libXcomposite.x86_64 libXcursor.x86_64 libXdamage.x86_64 libXext.x86_64 libXi.x86_64 libXtst.x86_64 cups-libs.x86_64 libXScrnSaver.x86_64 libXrandr.x86_64 GConf2.x86_64 alsa-lib.x86_64 atk.x86_64 gtk3.x86_64 -y
+#字体
+yum install ipa-gothic-fonts xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-utils xorg-x11-fonts-cyrillic xorg-x11-fonts-Type1 xorg-x11-fonts-misc -y
+
+#ubuntu 待补充
 ```
 
 ### 第三步 查看脚本功能
@@ -36,7 +46,17 @@ node index.js -h
 
 会看到如下功能
 
-![功能介绍](https://raw.githubusercontent.com/SirM2z/assets/master/image/seedhelp.png)
+```
+Usage: index [options]
+
+Options:
+
+  -V, --version       output the version number
+  -w, --water [type]  浇水+施肥功能，默认开启，0 or false 关闭 (default: true)
+  -a, --all           浇水+施肥功能，是否所有账号开启登录，默认只登主账号
+  -s, --sign          签到+阅读新闻功能
+  -h, --help          output usage information
+```
 
 ### 第四步 新建 `creds.js` 写入账号密码
 
