@@ -313,7 +313,7 @@ const water = async (page, type, userindex, nums) => {
   for (let i = 0; ; i++) {
     console.log(`------判断是否有人待浇水------`);
     let judgeIsEnd = 1;
-    let friendlistTimeout = 1000;
+    let friendlistTimeout = 3000;
     if (platform === 'linux') {
       friendlistTimeout = 10000;
       await delay(1000);
@@ -381,6 +381,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
   // 是否签到
   if (program.sign === true) {
     await sign(browser, page);
+    await page.goto(SEED_URL, {waitUntil: 'load'});
   }
   // 是否开启浇水功能
   if (program.water === true) {
@@ -413,9 +414,9 @@ const main = async (browser, page, type, userindex, user, nums) => {
     args.push(`--no-sandbox`);
   }
   // 若要显示无头浏览器 打开下行注释即可
-  // const browser = await puppeteer.launch({headless: false, slowMo: 100, args});
+  // const browser = await puppeteer.launch({headless: false, slowMo: 200, args});
   // 上行注释打开 下行注释需要关闭
-  const browser = await puppeteer.launch({slowMo: 100});
+  const browser = await puppeteer.launch({slowMo: 200});
   // 控制是否点击 可施肥 按钮
   let nums = 0;
   // 控制执行逻辑
