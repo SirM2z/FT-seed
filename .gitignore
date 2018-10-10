@@ -2,3 +2,4 @@ node_modules
 seedpackage.txt
 .vscode
 creds.js
+yarn-error.log

@@ -207,6 +207,7 @@ const login = async (page, type, userindex, user) => {
       document.querySelector(button).click();
     }, TW_USERNAME_SELECTOR, TW_PASSWORD_SELECTOR, TW_BUTTON_SELECTOR, user.name, user.pwd);
     await page.waitForNavigation();
+    await delay(3000);
   } else if (type === 'wb') {
     await page.click(WB_SELECTOR);
     await page.waitForSelector(WB_USERNAME_SELECTOR, {visible: true});
@@ -403,6 +404,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     .option('-w, --water [type]', '浇水+施肥功能，默认开启，0 or false 关闭', true)
     .option('-a, --all', '浇水+施肥功能，是否所有账号开启登录，默认只登主账号')
     .option('-s, --sign', '签到+阅读新闻功能')
+    .option('-o, --open', '显示无头浏览器')
     .parse(process.argv);
   
   // 启动
@@ -413,10 +415,15 @@ const main = async (browser, page, type, userindex, user, nums) => {
   if (platform === 'linux') {
     args.push(`--no-sandbox`);
   }
-  // 若要显示无头浏览器 打开下行注释即可
-  // const browser = await puppeteer.launch({headless: false, slowMo: 200, args});
-  // 上行注释打开 下行注释需要关闭
-  const browser = await puppeteer.launch({slowMo: 200});
+  let browser = ''
+  // 是否开启浇水功能
+  if (program.open === true) {
+    // 显示无头浏览器
+    browser = await puppeteer.launch({headless: false, slowMo: 200, args});
+  } else {
+    browser = await puppeteer.launch({slowMo: 200});
+  }
+  
   // 控制是否点击 可施肥 按钮
   let nums = 0;
   // 控制执行逻辑
