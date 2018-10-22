@@ -99,6 +99,12 @@ const WB_BUTTON_SELECTOR = '#outer > div > div.WB_panel.oauth_main > form > div 
 const FOOTER_SELECTOR = 'body > div.seedWrap01 > div > div.commsendFootBtnBar';
 // 收种子
 const GET_SELECTOR = '#useCanvas';
+// 失效种子
+const CLEAN_SEED_SELECTOR = '#matureCanvas';
+// 清除失效种子
+const CLEAN_SEED_DO_SELECTOR = 'body > div.seedWrap01 > div > div.animationQh01 > div.mainContent > div.opBtnBox > div';
+// 清除确认按钮
+const CLEAN_SEED_SURE_SELECTOR = 'body > div:nth-child(4) > div > div.btnBar01 > a';
 // 使用种子
 const USE_SELECTOR = 'body > div.floatBox01.seedDetailBox > div > div.btnBar01.ng-scope > a:nth-child(2)';
 // 关闭种子使用 弹出框
@@ -292,7 +298,8 @@ const water = async (page, type, userindex, nums) => {
   console.log(`------浇水开始！-${type}-${userindex}-----`);
   const judgeIsGet = await Promise.race([
     page.waitForSelector(GET_SELECTOR, {visible: true}).then(_ => 1),
-    page.waitForSelector(SELF_SELECTOR, {visible: true}).then(_ => 2)
+    page.waitForSelector(CLEAN_SEED_SELECTOR, {visible: true}).then(_ => 2),
+    page.waitForSelector(SELF_SELECTOR, {visible: true}).then(_ => 3)
   ]);
   if (judgeIsGet === 1) {
     console.log(`使用种子`);
@@ -301,6 +308,10 @@ const water = async (page, type, userindex, nums) => {
     await page.click(USE_SELECTOR);
     await page.waitForSelector(CLOSE_SELECTOR, {visible: true});
     await page.click(CLOSE_SELECTOR);
+  } else if (judgeIsGet === 2) {
+    await page.click(CLEAN_SEED_DO_SELECTOR);
+    await page.waitForSelector(CLEAN_SEED_SURE_SELECTOR, {visible: true});
+    await page.click(CLEAN_SEED_SURE_SELECTOR);
   }
   console.log(`开始自我浇水`);
   await page.click(SELF_SELECTOR);
