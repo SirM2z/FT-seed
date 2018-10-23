@@ -97,6 +97,8 @@ const WB_BUTTON_SELECTOR = '#outer > div > div.WB_panel.oauth_main > form > div 
 // #region main
 // 底部 footer
 const FOOTER_SELECTOR = 'body > div.seedWrap01 > div > div.commsendFootBtnBar';
+// 种子包
+const SEED_PACKAGE_SELECTOR = 'body > div.seedWrap01 > div > div.animationQh01 > div.mainContent > div.seedPackageEntrance';
 // 收种子
 const GET_SELECTOR = '#useCanvas';
 // 失效种子
@@ -140,6 +142,7 @@ const SEED_PACKAGE_CONTENT = `
 时间： date
 分享包路径： package_src
 `
+let seed_package_content = '';
 // #endregion
 
 const getHtml = async (page, selector) => {
@@ -294,7 +297,16 @@ const floow = async (page) => {
 const water = async (page, type, userindex, nums) => {
   // 浇水人数
   let water_nums = 0;
-  await page.waitForSelector(FOOTER_SELECTOR, {visible: true})
+  await page.waitForSelector(FOOTER_SELECTOR, {visible: true});
+  let seedPackage = 1;
+  try {
+    await page.waitForSelector(SEED_PACKAGE_SELECTOR, {visible: true, timeout: 3000});
+  } catch (error) {
+    seedPackage = 0;
+  }
+  if (seedPackage === 1 && seed_package_content) {
+    await wt(seed_package_content);
+  }
   console.log(`------浇水开始！-${type}-${userindex}-----`);
   const judgeIsGet = await Promise.race([
     page.waitForSelector(GET_SELECTOR, {visible: true}).then(_ => 1),
@@ -368,24 +380,28 @@ const main = async (browser, page, type, userindex, user, nums) => {
   let main_finished = false; // 应用是否执行完毕
   let requestfinished_event = false; // 响应事件触发完毕
   // 监听页面 请求完成事件
-  page.on('requestfinished', async interceptedRequest => {
-    if (interceptedRequest.url().includes('https://seed.futunn.com/main/culture-room')) {
-      let response = interceptedRequest.response();
-      let bodydata = await response.json();
-      let id = bodydata.data.seed.seed_id;
-      let key = bodydata.data.seed_package.key;
-      let url = `https://seed.futunn.com/package?key=${key}`;
-      let content = SEED_PACKAGE_CONTENT.replace('date', new Date().toLocaleString()).replace('package_src', url);
-      if (key) {
-        await wt(content);
+  try {
+    page.on('requestfinished', async interceptedRequest => {
+      if (interceptedRequest.url().includes('https://seed.futunn.com/main/culture-room')) {
+        let response = interceptedRequest.response();
+        let bodydata = await response.json();
+        let id = bodydata.data.seed.seed_id;
+        let key = bodydata.data.seed_package.key;
+        let url = `https://seed.futunn.com/package?key=${key}`;
+        let content = SEED_PACKAGE_CONTENT.replace('date', new Date().toLocaleString()).replace('package_src', url);
+        if (key) {
+          seed_package_content = content;
+        }
+        requestfinished_event = true;
+        if (main_finished) {
+          await page.goto(LOGOUT);
+          return;
+        }
       }
-      requestfinished_event = true;
-      if (main_finished) {
-        await page.goto(LOGOUT);
-        return;
-      }
-    }
-  });
+    });
+  } catch (error) {
+    console.log('page on requestfinished error');
+  }
   await page.goto(SEED_LOGIN_URL, {waitUntil: 'load'});
   await page.setDefaultNavigationTimeout(60 * 1000);
   // 登录
