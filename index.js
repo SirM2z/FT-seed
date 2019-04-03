@@ -448,7 +448,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     // 显示无头浏览器
     browser = await puppeteer.launch({headless: false, slowMo: 200, args});
   } else {
-    browser = await puppeteer.launch({slowMo: 200});
+    browser = await puppeteer.launch({slowMo: 200, args});
   }
   
   // 控制是否点击 可施肥 按钮
