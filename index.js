@@ -338,10 +338,10 @@ const water = async (page, type, userindex, nums) => {
     console.log(`------判断是否有人待浇水------`);
     let judgeIsEnd = 1;
     let friendlistTimeout = 3000;
-    if (platform === 'linux') {
-      friendlistTimeout = 10000;
-      await delay(1000);
-    }
+    // if (platform === 'linux') {
+    //   friendlistTimeout = 10000;
+    //   await delay(1000);
+    // }
     try {
       await page.waitForSelector(FIRSTFRIENDS_SELECTOR, {visible: true, timeout: friendlistTimeout});
     } catch (error) {
