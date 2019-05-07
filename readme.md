@@ -55,7 +55,7 @@ Options:
   -V, --version       output the version number
   -w, --water [type]  浇水+施肥功能，默认开启，0 or false 关闭 (default: true)
   -a, --all           浇水+施肥功能，是否所有账号开启登录，默认只登主账号
-  -s, --sign          签到+阅读新闻功能
+  -s, --sign          签到+阅读新闻功能+观看视频
   -h, --help          output usage information
 ```
 
