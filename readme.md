@@ -29,7 +29,7 @@ yarn
 
 根据系统 安装依赖
 
-(chrome-headless-doesnt-launch-on-unix)[https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#chrome-headless-doesnt-launch-on-unix]
+[chrome-headless-doesnt-launch-on-unix](https://github.com/GoogleChrome/puppeteer/blob/master/docs/troubleshooting.md#chrome-headless-doesnt-launch-on-unix)
 
 
 ### 第三步 查看脚本功能
