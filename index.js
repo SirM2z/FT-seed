@@ -18,6 +18,14 @@ const SIGNIN_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > sp
 const SIGNED_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > a.sign-btn';
 // 今日要闻
 const NEWS_SELECTOR = 'body > div.wrap > div.homeHotBox > div.cBox01 > div > div.c01 > div > ul > li:nth-child(1) > a';
+// 观看视频
+const VIEW_VIDEO_URL = 'https://live.futunn.com/course/1046'
+// 观看视频-目录按钮
+const VIDEO_MULU_BTN_SELECTOR = 'body > div > div.nav-box.ng-scope > div:nth-child(2)';
+// 观看视频-第一条视频
+const VIDEO_FIRST_SELECTOR = 'body > div > div.optBox.ng-scope.ng-isolate-scope > div > div.list.ng-scope > dl:nth-child(1) > dd:nth-child(2)';
+// 每日任务
+const DAILY_TASK_URL = 'https://mobile.futunn.com/credits-v2/daily-task';
 // 退出页
 const LOGOUT = 'https://www.futunn.com/site/logout';
 // #endregion
@@ -248,6 +256,28 @@ const sign = async (browser, page) => {
   const newPage = await newPagePromise;
   await delay(2000);
   await newPage.close();
+  console.log(`    观看视频-开始`);
+  await page.goto(VIEW_VIDEO_URL, {waitUntil: 'load'});
+  let muluBtn = 1;
+  try {
+    await page.waitForSelector(VIDEO_MULU_BTN_SELECTOR, {visible: true, timeout: 3000});
+  } catch (error) {
+    muluBtn = 0;
+  }
+  if (muluBtn === 1) {
+    await page.click(VIDEO_MULU_BTN_SELECTOR);
+    let videoFirst = 1;
+    try {
+      await page.waitForSelector(VIDEO_MULU_BTN_SELECTOR, {visible: true, timeout: 3000});
+    } catch (error) {
+      videoFirst = 0;
+    }
+    if (videoFirst === 1) {
+      await page.click(VIDEO_FIRST_SELECTOR);
+      await delay(2000);
+      console.log(`    观看视频-结束`);
+    }
+  }
   console.log(`------签到结束------`);
 };
 
@@ -430,7 +460,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     .version('0.0.2')
     .option('-w, --water [type]', '浇水+施肥功能，默认开启，0 or false 关闭', true)
     .option('-a, --all', '浇水+施肥功能，是否所有账号开启登录，默认只登主账号')
-    .option('-s, --sign', '签到+阅读新闻功能')
+    .option('-s, --sign', '签到+阅读新闻功能+观看视频')
     .option('-o, --open', '显示无头浏览器')
     .parse(process.argv);
   

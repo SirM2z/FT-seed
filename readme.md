@@ -6,6 +6,7 @@
 - 互相浇水
 - 签到
 - 阅读新闻
+- 观看视频
 - 导出种子包
 
 ## 使用方法
@@ -41,7 +42,7 @@ yum install ipa-gothic-fonts xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11
 ### 第三步 查看脚本功能
 
 ```shell
-node index.js -h
+npm run help
 ```
 
 会看到如下功能

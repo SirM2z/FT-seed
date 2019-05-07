@@ -1,6 +1,26 @@
 {
+  "name": "FT-seed",
+  "description": "## 涵盖功能",
+  "version": "1.0.0",
+  "main": "index.js",
   "dependencies": {
     "commander": "^2.17.0",
     "puppeteer": "^1.6.2"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js",
+    "help": "node index.js -h"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirM2z/FT-seed.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SirM2z/FT-seed/issues"
+  },
+  "homepage": "https://github.com/SirM2z/FT-seed#readme"
 }
