@@ -7,17 +7,18 @@ const platform = os.platform();
 
 // #region 签到
 // 登录页
-const LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fwww.futunn.com%2F';
+const LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fwww.futunn.com%2Faccount%2Fhome';
 // 签到页
-const SIGN_URL = 'https://www.futunn.com/';
+const SIGN_URL = 'https://www.futunn.com/account/home';
 // 个人中心页
 const PERSONAL_SELECTOR = '#accountHeader > div:nth-child(1) > div.imgBox > a';
 // 签到按钮
-const SIGNIN_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > span';
+const SIGNIN_SELECTOR = '#signBox > a.signIn';
 // 签过到按钮
-const SIGNED_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > a.sign-btn';
+const SIGNED_SELECTOR = '#signBox > a.signed';
 // 今日要闻
-const NEWS_SELECTOR = 'body > div.wrap > div.homeHotBox > div.cBox01 > div > div.c01 > div > ul > li:nth-child(1) > a';
+const NEWS_URL = 'https://news.futunn.com/main'
+const NEWS_SELECTOR = '#news-list-container > li:nth-child(1) > a';
 // 观看视频
 const VIEW_VIDEO_URL = 'https://live.futunn.com/course/1046'
 // 观看视频-目录按钮
@@ -238,24 +239,26 @@ const login = async (page, type, userindex, user) => {
 
 // 签到功能
 const sign = async (browser, page) => {
+	console.log(`------开始签到------`);
   await page.goto(SIGN_URL, {waitUntil: 'load'});
-  console.log(`------开始签到------`);
   let judgeIsSign = await Promise.race([
     page.waitForSelector(SIGNIN_SELECTOR, {visible: true}).then(_ => 1),
     page.waitForSelector(SIGNED_SELECTOR, {visible: true}).then(_ => 2)
   ]);
   if (judgeIsSign === 1) {
-    console.log(`      成功签到`);
     await page.click(SIGNIN_SELECTOR);
+	console.log(`      成功签到`);
   } else {
     console.log(`     今天已签到`);
   }
+  console.log(`    阅读新闻-开始`);
+  await page.goto(NEWS_URL, {waitUntil: 'load'});
   const newPagePromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
-  console.log(`    阅读新闻成功`);
   await page.click(NEWS_SELECTOR);
   const newPage = await newPagePromise;
   await delay(2000);
   await newPage.close();
+  console.log(`    阅读新闻成功`);
   console.log(`    观看视频-开始`);
   await page.goto(VIEW_VIDEO_URL, {waitUntil: 'load'});
   let muluBtn = 1;
@@ -466,7 +469,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
   
   // 启动
   const width = 1200;
-  const height = 950;
+  const height = 980;
   let args = [];
   args.push(`--window-size=${width},${height}`);
   if (platform === 'linux') {
@@ -488,7 +491,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     // 副号 走一波
     for (let i = 0, ilen = data.length; i < ilen; i++) {
       for (let j = 0, jlen = data[i].list.length; j < jlen; j++) {
-        if (data[i].type === 'self' && j === 0) continue;
+        //if (data[i].type === 'self' && j === 0) continue;
         const page = await browser.newPage();
         // 去除 页面内部自定义宽高 导致 滚动条出现
         await page._client.send('Emulation.clearDeviceMetricsOverride');
