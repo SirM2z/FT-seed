@@ -6,18 +6,14 @@ const { data } = require('./creds');
 const platform = os.platform();
 
 // #region 签到
-// 登录页
-const LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fwww.futunn.com%2F';
 // 签到页
-const SIGN_URL = 'https://www.futunn.com/';
-// 个人中心页
-const PERSONAL_SELECTOR = '#accountHeader > div:nth-child(1) > div.imgBox > a';
+const SIGN_URL = 'https://www.futu5.com/login';
 // 签到按钮
-const SIGNIN_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > span';
-// 签过到按钮
-const SIGNED_SELECTOR = '#creditsSignBox > div.sign-content > div.sign-foot > a.sign-btn';
-// 今日要闻
-const NEWS_SELECTOR = 'body > div.wrap > div.homeHotBox > div.cBox01 > div > div.c01 > div > ul > li:nth-child(1) > a';
+const SIGNIN_SELECTOR = '#home_sign_in';
+// 今日要闻链接
+const NEWS_URL = 'https://news.futunn.com/main';
+// 今日要闻第一条
+const NEWS_SELECTOR = '#news-list-container > li:nth-child(1) > a > div';
 // 观看视频
 const VIEW_VIDEO_URL = 'https://live.futunn.com/course/1046'
 // 观看视频-目录按钮
@@ -26,8 +22,14 @@ const VIDEO_MULU_BTN_SELECTOR = 'body > div > div.nav-box.ng-scope > div:nth-chi
 const VIDEO_FIRST_SELECTOR = 'body > div > div.optBox.ng-scope.ng-isolate-scope > div > div.list.ng-scope > dl:nth-child(1) > dd:nth-child(2)';
 // 每日任务
 const DAILY_TASK_URL = 'https://mobile.futunn.com/credits-v2/daily-task';
+// 每日任务第一个奖励 20 积分
+const DAILY_TASK_FIRST_SELECTOR = '#app > div > div.daily-task > div.schedule-com > div > div > ul > li:nth-child(1) > div.schedule.no-select > div.schedule-gift > i';
+// 每日任务第二个奖励
+const DAILY_TASK_SECOND_SELECTOR = '#app > div > div.daily-task > div.schedule-com > div > div > ul > li:nth-child(2) > div.schedule.no-select > div.schedule-gift > i';
+// 每日任务第三个奖励
+const DAILY_TASK_THIRD_SELECTOR = '#app > div > div.daily-task > div.schedule-com > div > div > ul > li:nth-child(3) > div.schedule.no-select > div.schedule-gift > i';
 // 退出页
-const LOGOUT = 'https://www.futunn.com/site/logout';
+const LOGOUT = 'https://account.futu5.com/user/logout';
 // #endregion
 
 // #region login
@@ -45,7 +47,7 @@ const BUTTON_SELECTOR = '#loginFormWrapper > form > input.ui-submit.ui-form-subm
 
 // #region xiaomi
 // 小米登录
-const XIAOMI_SELECTOR = 'body > div > div.m-form-wrapper.j-content-wrapper > div.u-oauth-login.j-oauth-login > div.open001 > div > a.xiaomi.iconfont';
+const XIAOMI_SELECTOR = 'body > div > div.m-form-wrapper.m-logreg-wrapper > div.u-oauth-login.j-oauth-login.wxmsgHide > div.open001 > div > a.xiaomi.iconfont';
 // 小米用户名
 const XIAOMI_USERNAME_SELECTOR = '#username';
 // 小米密码
@@ -56,7 +58,7 @@ const XIAOMI_BUTTON_SELECTOR = '#login-button';
 
 // #region Q
 // qq登录
-const Q_SELECTOR = 'body > div > div.m-form-wrapper.j-content-wrapper > div.u-oauth-login.j-oauth-login > div.open001 > div > a.qq.iconfont';
+const Q_SELECTOR = 'body > div > div.m-form-wrapper.m-logreg-wrapper > div.u-oauth-login.j-oauth-login.wxmsgHide > div.open001 > div > a.qq.iconfont';
 // qqiframe
 const Q_FRAME_SELECTOR = '#ptlogin_iframe';
 // qq账号密码登录
@@ -71,7 +73,7 @@ const Q_BUTTON_SELECTOR = '#login_button';
 
 // #region fb
 // fb登录
-const FB_SELECTOR = 'body > div > div.m-form-wrapper.j-content-wrapper > div.u-oauth-login.j-oauth-login > div.open001 > div > a.fb.iconfont';
+const FB_SELECTOR = 'body > div > div.m-form-wrapper.m-logreg-wrapper > div.u-oauth-login.j-oauth-login.wxmsgHide > div.open001 > div > a.fb.iconfont';
 // fb用户名
 const FB_USERNAME_SELECTOR = '#email';
 // fb密码
@@ -82,7 +84,7 @@ const FB_BUTTON_SELECTOR = '#loginbutton';
 
 // #region twittwe
 // tw登录
-const TW_SELECTOR = 'body > div > div.m-form-wrapper.j-content-wrapper > div.u-oauth-login.j-oauth-login > div.open001 > div > a.tw.iconfont';
+const TW_SELECTOR = 'body > div > div.m-form-wrapper.m-logreg-wrapper > div.u-oauth-login.j-oauth-login.wxmsgHide > div.open001 > div > a.tw.iconfont';
 // tw用户名
 const TW_USERNAME_SELECTOR = '#username_or_email';
 // tw密码
@@ -93,7 +95,7 @@ const TW_BUTTON_SELECTOR = '#allow';
 
 // #region weibo
 // wb登录
-const WB_SELECTOR = 'body > div > div.m-form-wrapper.j-content-wrapper > div.u-oauth-login.j-oauth-login > div.open001 > div > a.sina.mr0.iconfont';
+const WB_SELECTOR = 'body > div > div.m-form-wrapper.m-logreg-wrapper > div.u-oauth-login.j-oauth-login.wxmsgHide > div.open001 > div > a.sina.mr0.iconfont';
 // wb用户名
 const WB_USERNAME_SELECTOR = '#userId';
 // wb密码
@@ -240,22 +242,32 @@ const login = async (page, type, userindex, user) => {
 const sign = async (browser, page) => {
   await page.goto(SIGN_URL, {waitUntil: 'load'});
   console.log(`------开始签到------`);
-  let judgeIsSign = await Promise.race([
-    page.waitForSelector(SIGNIN_SELECTOR, {visible: true}).then(_ => 1),
-    page.waitForSelector(SIGNED_SELECTOR, {visible: true}).then(_ => 2)
-  ]);
-  if (judgeIsSign === 1) {
-    console.log(`      成功签到`);
-    await page.click(SIGNIN_SELECTOR);
-  } else {
-    console.log(`     今天已签到`);
+  let judgeIsSign = 1;
+  try {
+    await page.waitForSelector(SIGNIN_SELECTOR, {visible: true, timeout: 3000});
+  } catch (error) {
+    judgeIsSign = 0;
   }
-  const newPagePromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
-  console.log(`    阅读新闻成功`);
-  await page.click(NEWS_SELECTOR);
-  const newPage = await newPagePromise;
-  await delay(2000);
-  await newPage.close();
+  if (judgeIsSign === 1) {
+    await page.click(SIGNIN_SELECTOR);
+    console.log(`      成功签到`);
+  }
+  console.log(`    开始阅读新闻`);
+  await page.goto(NEWS_URL, {waitUntil: 'load'});
+  let newsFirstItem = 1;
+  try {
+    await page.waitForSelector(NEWS_SELECTOR, {visible: true, timeout: 3000});
+  } catch (error) {
+    newsFirstItem = 0;
+  }
+  if (newsFirstItem === 1) {
+    const newPagePromise = new Promise(resolve => browser.once('targetcreated', target => resolve(target.page())));
+    await page.click(NEWS_SELECTOR);
+    const newPage = await newPagePromise;
+    await delay(2000);
+    await newPage.close();
+    console.log(`    阅读新闻成功`);
+  }
   console.log(`    观看视频-开始`);
   await page.goto(VIEW_VIDEO_URL, {waitUntil: 'load'});
   let muluBtn = 1;
@@ -279,6 +291,26 @@ const sign = async (browser, page) => {
     }
   }
   console.log(`------签到结束------`);
+};
+
+// 领取每日任务第一个奖励
+const day = async (browser, page) => {
+  await page.goto(DAILY_TASK_URL, {waitUntil: 'load'});
+  console.log(`------开始领取奖励------`);
+  let dayTaskFirstAward = 1;
+  try {
+    await page.waitForSelector(DAILY_TASK_FIRST_SELECTOR, {visible: true, timeout: 3000});
+  } catch (error) {
+    dayTaskFirstAward = 0;
+  }
+  if (dayTaskFirstAward === 1) {
+    await page.click(DAILY_TASK_FIRST_SELECTOR);
+    await delay(2000);
+    await page.click(DAILY_TASK_SECOND_SELECTOR);
+    await delay(2000);
+    await page.click(DAILY_TASK_THIRD_SELECTOR);
+    console.log(`------成功领取奖励------`);
+  }
 };
 
 // 批量关注功能
@@ -441,6 +473,11 @@ const main = async (browser, page, type, userindex, user, nums) => {
     await sign(browser, page);
     await page.goto(SEED_URL, {waitUntil: 'load'});
   }
+  // 是否领取每日任务第一个奖励
+  if (program.day === true) {
+    await day(browser, page);
+    await page.goto(SEED_URL, {waitUntil: 'load'});
+  }
   // 是否开启浇水功能
   if (program.water === true) {
     await water(page, type, userindex, nums);
@@ -461,6 +498,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     .option('-w, --water [type]', '浇水+施肥功能，默认开启，0 or false 关闭', true)
     .option('-a, --all', '浇水+施肥功能，是否所有账号开启登录，默认只登主账号')
     .option('-s, --sign', '签到+阅读新闻功能+观看视频')
+    .option('-d, --day', '领取每日任务奖励')
     .option('-o, --open', '显示无头浏览器')
     .parse(process.argv);
   
