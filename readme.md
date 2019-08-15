@@ -8,6 +8,7 @@
 - 阅读新闻
 - 观看视频
 - 领取每日任务奖励
+- 领取7日连续签到抽奖
 - 导出种子包
 
 ## 使用方法
@@ -49,8 +50,7 @@ Options:
   -V, --version       output the version number
   -w, --water [type]  浇水+施肥功能，默认开启，0 or false 关闭 (default: true)
   -a, --all           浇水+施肥功能，是否所有账号开启登录，默认只登主账号
-  -s, --sign          签到+阅读新闻功能+观看视频
-  -d, --day           领取每日任务奖励
+  -s, --sign          签到+阅读新闻功能+观看视频+领取每日任务奖励+抽取7日连续签到抽奖
   -o, --open          显示无头浏览器
   -h, --help          output usage information
 ```

@@ -6,10 +6,6 @@ const { data } = require('./creds');
 const platform = os.platform();
 
 // #region 签到
-// 签到页
-const SIGN_URL = 'https://www.futu5.com/login';
-// 签到按钮
-const SIGNIN_SELECTOR = '#home_sign_in';
 // 今日要闻链接
 const NEWS_URL = 'https://news.futunn.com/main';
 // 今日要闻第一条
@@ -28,6 +24,18 @@ const DAILY_TASK_FIRST_SELECTOR = '#app > div > div.daily-task > div.schedule-co
 const DAILY_TASK_SECOND_SELECTOR = '#app > div > div.daily-task > div.schedule-com > div > div > ul > li:nth-child(2) > div.schedule.no-select > div.schedule-gift > i';
 // 每日任务第三个奖励
 const DAILY_TASK_THIRD_SELECTOR = '#app > div > div.daily-task > div.schedule-com > div > div > ul > li:nth-child(3) > div.schedule.no-select > div.schedule-gift > i';
+// 每日任务页签到按钮
+const DAILY_TASK_SIGN_BTN_SELECTOR = '#app > div > div.top > div.user-info.bg_white > div.side-right > ul > li:nth-child(1) > i';
+// 每日任务 签到领积分按钮--可签到
+const DAILY_TASK_GET_JF_ENABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-info > div.sign-btn.bg_orange.c_white';
+// 每日任务 签到领积分按钮--不可签到
+const DAILY_TASK_GET_JF_DISABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-info > div.sign-btn.bg_orange_op2.c_orange';
+// 每日任务 签到面板关闭按钮
+const DAILY_TASK_SIGN_MODAL_CLOSE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.icon-close-o';
+// 每日任务 7日抽奖按钮--可抽
+const DAILY_TASK_7_AWARD_ENABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_gray.c_deep_gray > i.icon-gift-enable';
+// 每日任务 7日抽奖按钮--不可抽
+const DAILY_TASK_7_AWARD_DISABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_gray.c_deep_gray > i.icon-gift-disable';
 // 退出页
 const LOGOUT = 'https://account.futu5.com/user/logout';
 // #endregion
@@ -240,18 +248,7 @@ const login = async (page, type, userindex, user) => {
 
 // 签到功能
 const sign = async (browser, page) => {
-  await page.goto(SIGN_URL, {waitUntil: 'load'});
   console.log(`------开始签到------`);
-  let judgeIsSign = 1;
-  try {
-    await page.waitForSelector(SIGNIN_SELECTOR, {visible: true, timeout: 3000});
-  } catch (error) {
-    judgeIsSign = 0;
-  }
-  if (judgeIsSign === 1) {
-    await page.click(SIGNIN_SELECTOR);
-    console.log(`      成功签到`);
-  }
   console.log(`    开始阅读新闻`);
   await page.goto(NEWS_URL, {waitUntil: 'load'});
   let newsFirstItem = 1;
@@ -290,27 +287,39 @@ const sign = async (browser, page) => {
       console.log(`    观看视频-结束`);
     }
   }
-  console.log(`------签到结束------`);
-};
-
-// 领取每日任务第一个奖励
-const day = async (browser, page) => {
+  console.log(`    开始进入每日任务页`);
   await page.goto(DAILY_TASK_URL, {waitUntil: 'load'});
-  console.log(`------开始领取奖励------`);
-  let dayTaskFirstAward = 1;
-  try {
-    await page.waitForSelector(DAILY_TASK_FIRST_SELECTOR, {visible: true, timeout: 3000});
-  } catch (error) {
-    dayTaskFirstAward = 0;
+  await page.waitForSelector(DAILY_TASK_SIGN_BTN_SELECTOR, {visible: true, timeout: 3000});
+  await page.click(DAILY_TASK_SIGN_BTN_SELECTOR);
+  let judgeIsSign = await Promise.race([
+    page.waitForSelector(DAILY_TASK_GET_JF_ENABLE_SELECTOR, {visible: true}).then(_ => 1),
+    page.waitForSelector(DAILY_TASK_GET_JF_DISABLE_SELECTOR, {visible: true}).then(_ => 2)
+  ]);
+  if (judgeIsSign === 1) {
+    await page.click(DAILY_TASK_GET_JF_ENABLE_SELECTOR);
+    console.log(`    成功签到`);
+  } else {
+    console.log(`    已经签到`);
   }
-  if (dayTaskFirstAward === 1) {
-    await page.click(DAILY_TASK_FIRST_SELECTOR);
-    await delay(2000);
-    await page.click(DAILY_TASK_SECOND_SELECTOR);
-    await delay(2000);
-    await page.click(DAILY_TASK_THIRD_SELECTOR);
-    console.log(`------成功领取奖励------`);
+  await page.click(DAILY_TASK_SIGN_MODAL_CLOSE_SELECTOR);
+  console.log(`    开始抽取7日奖励`);
+  let judgeIsGet7Award = await Promise.race([
+    page.waitForSelector(DAILY_TASK_7_AWARD_ENABLE_SELECTOR, {visible: true}).then(_ => 1),
+    page.waitForSelector(DAILY_TASK_7_AWARD_DISABLE_SELECTOR, {visible: true}).then(_ => 2)
+  ]);
+  if (judgeIsGet7Award === 1) {
+    await page.click(DAILY_TASK_7_AWARD_ENABLE_SELECTOR);
+    console.log(`    成功抽奖`);
+  } else {
+    console.log(`    不能抽奖`);
   }
+  console.log(`    开始领取奖励`);
+  await page.click(DAILY_TASK_FIRST_SELECTOR);
+  await delay(1000);
+  await page.click(DAILY_TASK_SECOND_SELECTOR);
+  await delay(1000);
+  await page.click(DAILY_TASK_THIRD_SELECTOR);
+  console.log(`------签到结束------`);
 };
 
 // 批量关注功能
@@ -473,11 +482,6 @@ const main = async (browser, page, type, userindex, user, nums) => {
     await sign(browser, page);
     await page.goto(SEED_URL, {waitUntil: 'load'});
   }
-  // 是否领取每日任务第一个奖励
-  if (program.day === true) {
-    await day(browser, page);
-    await page.goto(SEED_URL, {waitUntil: 'load'});
-  }
   // 是否开启浇水功能
   if (program.water === true) {
     await water(page, type, userindex, nums);
@@ -497,8 +501,7 @@ const main = async (browser, page, type, userindex, user, nums) => {
     .version('0.0.2')
     .option('-w, --water [type]', '浇水+施肥功能，默认开启，0 or false 关闭', true)
     .option('-a, --all', '浇水+施肥功能，是否所有账号开启登录，默认只登主账号')
-    .option('-s, --sign', '签到+阅读新闻功能+观看视频')
-    .option('-d, --day', '领取每日任务奖励')
+    .option('-s, --sign', '签到+阅读新闻功能+观看视频+领取每日任务奖励+抽取7日连续签到抽奖')
     .option('-o, --open', '显示无头浏览器')
     .parse(process.argv);
   
