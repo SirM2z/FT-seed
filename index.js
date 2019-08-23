@@ -32,10 +32,8 @@ const DAILY_TASK_GET_JF_ENABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > 
 const DAILY_TASK_GET_JF_DISABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-info > div.sign-btn.bg_orange_op2.c_orange';
 // 每日任务 签到面板关闭按钮
 const DAILY_TASK_SIGN_MODAL_CLOSE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.icon-close-o';
-// 每日任务 7日抽奖按钮--可抽
-const DAILY_TASK_7_AWARD_ENABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_gray.c_deep_gray > i.icon-gift-enable';
-// 每日任务 7日抽奖按钮--不可抽
-const DAILY_TASK_7_AWARD_DISABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_gray.c_deep_gray > i.icon-gift-disable';
+// 每日任务 7日抽奖按钮
+const DAILY_TASK_7_AWARD_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_gray.c_deep_gray > i';
 // 退出页
 const LOGOUT = 'https://account.futu5.com/user/logout';
 // #endregion
@@ -301,23 +299,15 @@ const sign = async (browser, page) => {
   } else {
     console.log(`    已经签到`);
   }
-  await page.click(DAILY_TASK_SIGN_MODAL_CLOSE_SELECTOR);
   console.log(`    开始抽取7日奖励`);
-  let judgeIsGet7Award = await Promise.race([
-    page.waitForSelector(DAILY_TASK_7_AWARD_ENABLE_SELECTOR, {visible: true}).then(_ => 1),
-    page.waitForSelector(DAILY_TASK_7_AWARD_DISABLE_SELECTOR, {visible: true}).then(_ => 2)
-  ]);
-  if (judgeIsGet7Award === 1) {
-    await page.click(DAILY_TASK_7_AWARD_ENABLE_SELECTOR);
-    console.log(`    成功抽奖`);
-  } else {
-    console.log(`    不能抽奖`);
-  }
+  await page.click(DAILY_TASK_7_AWARD_SELECTOR);
+  console.log(`    以点击抽奖按钮`);
+  await page.click(DAILY_TASK_SIGN_MODAL_CLOSE_SELECTOR);
   console.log(`    开始领取奖励`);
   await page.click(DAILY_TASK_FIRST_SELECTOR);
-  await delay(1000);
+  await delay(2000);
   await page.click(DAILY_TASK_SECOND_SELECTOR);
-  await delay(1000);
+  await delay(2000);
   await page.click(DAILY_TASK_THIRD_SELECTOR);
   console.log(`------签到结束------`);
 };
