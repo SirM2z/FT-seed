@@ -36,6 +36,8 @@ const DAILY_TASK_SIGN_MODAL_CLOSE_SELECTOR = '#app > div > div.sign-in-com.fixed
 const DAILY_TASK_7_AWARD_DISABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_gray.c_deep_gray > i';
 // 每日任务 7日抽奖按钮--可抽
 const DAILY_TASK_7_AWARD_ENABLE_SELECTOR = '#app > div > div.sign-in-com.fixed > div.sign-in > div.sign-list > ul > li.no-select.bg_orange_op2.c_orange > i';
+// 每日任务 7日抽奖弹窗-关闭按钮
+const DAILY_TASK_7_AWARD_CLOSE_SELECTOR = '#app > div > div.reward-dialog > div.ui-dialog-box._u-modal-box.ui-show.ui-dialog-animation > div > i';
 // 退出页
 const LOGOUT = 'https://account.futu5.com/user/logout';
 // #endregion
@@ -308,6 +310,8 @@ const sign = async (browser, page) => {
   ]);
   if (judgeIsAward === 1) {
     await page.click(DAILY_TASK_7_AWARD_ENABLE_SELECTOR);
+    await page.waitForSelector(DAILY_TASK_7_AWARD_CLOSE_SELECTOR, {visible: true, timeout: 3000});
+    await page.click(DAILY_TASK_7_AWARD_CLOSE_SELECTOR);
     console.log(`    成功抽奖`);
   } else {
     console.log(`    不能抽奖`);
