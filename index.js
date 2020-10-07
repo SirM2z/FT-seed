@@ -44,7 +44,7 @@ const LOGOUT = 'https://account.futu5.com/user/logout';
 
 // #region login
 // 需登录的种子页
-const SEED_LOGIN_URL = 'https://passport.futu5.com/?target=https%3A%2F%2Fseed.futunn.com%2F';
+const SEED_LOGIN_URL = 'https://passport.futunn.com/?target=https%3A%2F%2Fseed.futunn.com%2F';
 // 种子页
 const SEED_URL = 'https://seed.futunn.com/';
 // 用户名
