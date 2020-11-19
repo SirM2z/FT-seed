@@ -39,7 +39,7 @@ const DAILY_TASK_7_AWARD_ENABLE_SELECTOR = '#app > div > div.sign-in-com.fixed >
 // 每日任务 7日抽奖弹窗-关闭按钮
 const DAILY_TASK_7_AWARD_CLOSE_SELECTOR = '#app > div > div.reward-dialog > div.ui-dialog-box._u-modal-box.ui-show.ui-dialog-animation > div > i';
 // 退出页
-const LOGOUT = 'https://account.futu5.com/user/logout';
+const LOGOUT = 'https://www.futunn.com/site/logout';
 // #endregion
 
 // #region login
